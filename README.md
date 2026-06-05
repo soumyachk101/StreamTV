@@ -172,7 +172,7 @@ Ensure you have the following installed:
    Create a `.env` file inside the `server/` directory:
    ```env
    PORT=5050
-   DATABASE_URL="postgresql://user:password@localhost:5432/neondb?sslmode=require"
+   DATABASE_URL="postgresql://your_username:your_password@localhost:5432/neondb?sslmode=require"
    JWT_SECRET="YOUR_RANDOM_LONG_SECRET_STRING_32_CHARACTERS"
    JWT_EXPIRES_IN="7d"
    BCRYPT_ROUNDS=10
