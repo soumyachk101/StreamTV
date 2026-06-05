@@ -126,7 +126,6 @@ export default function AuthModern({ initialMode }: AuthModernProps) {
     e.preventDefault();
     setError('');
 
-<<<<<<< HEAD
     if (!isValidEmail(email)) {
       setError('Please enter a valid email address');
       return;
@@ -149,21 +148,6 @@ export default function AuthModern({ initialMode }: AuthModernProps) {
         return;
       }
     }
-=======
-                    {/* Bottom Content */}
-                    <div className="relative z-10">
-                        <div className="flex items-end justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 border-2 border-white/20 p-0.5">
-                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" className="w-full h-full rounded-full bg-slate-800" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-lg leading-tight">ProGamer.tv</h4>
-                                    <p className="text-xs text-white/60">Live Streaming & Gaming</p>
-                                </div>
-                            </div>
->>>>>>> origin/main
 
     setLoading(true);
     try {
@@ -228,63 +212,9 @@ export default function AuthModern({ initialMode }: AuthModernProps) {
           <div className="absolute top-[-20%] right-[-15%] w-72 h-72 rounded-blob-2 bg-secondary/20 blur-2xl pointer-events-none" />
           <div className="absolute bottom-[-15%] left-[-15%] w-72 h-72 rounded-blob-1 bg-accent/20 blur-2xl pointer-events-none" />
 
-<<<<<<< HEAD
           <Link href="/" className="relative z-10 flex items-center gap-2 w-fit">
             <div className="h-8 w-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white">
               <Logo className="h-4 w-4 text-white fill-white ml-0.5" />
-=======
-                            <div className="flex justify-end">
-                                <button type="button" className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors">
-                                    Forgot password?
-                                </button>
-                            </div>
-
-                            {error && (
-                                <div className="p-3 bg-red-50 text-red-500 text-sm rounded-lg text-center">
-                                    {error}
-                                </div>
-                            )}
-
-                            {/* Divider */}
-                            <div className="relative flex py-4 items-center">
-                                <div className="flex-grow border-t border-slate-200"></div>
-                                <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-semibold">or</span>
-                                <div className="flex-grow border-t border-slate-200"></div>
-                            </div>
-
-                            <button type="button" className="w-full py-3.5 rounded-xl border border-slate-200 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-sm" onClick={() => alert("Google Login coming soon")}>
-                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-5 h-5" alt="Google" />
-                                {isLogin ? 'Login with Google' : 'Sign up with Google'}
-                            </button>
-
-                            <button
-                                disabled={loading}
-                                className="w-full py-4 rounded-xl bg-[#EA4335] hover:bg-[#d63d30] text-white font-bold text-sm shadow-lg shadow-red-500/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
-                            >
-                                {loading ? <Loader2 className="animate-spin mx-auto text-white" /> : (isLogin ? 'Login' : 'Sign Up')}
-                            </button>
-
-                            <div className="text-center mt-6">
-                                <span className="text-slate-500 text-sm">
-                                    {isLogin ? "Don't have an account? " : "Already have an account? "}
-                                    <button type="button" onClick={toggleMode} className="text-[#EA4335] font-bold hover:underline">
-                                        {isLogin ? 'Sign up' : 'Login'}
-                                    </button>
-                                </span>
-                            </div>
-
-                        </form>
-
-                        {/* Social Icons Bottom */}
-                        <div className="mt-10 flex justify-center gap-6 opacity-60">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 cursor-pointer transition-colors"></div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
->>>>>>> origin/main
             </div>
             <span className="font-heading font-extrabold text-white text-lg">Stream.Tv</span>
           </Link>

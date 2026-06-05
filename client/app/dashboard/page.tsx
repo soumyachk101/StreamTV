@@ -3,18 +3,11 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
-<<<<<<< HEAD
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Play, TrendingUp, Radio, Flame, Music, Gamepad2, Search as SearchIcon, Sparkles, Tv, Mic2, Film, BookOpen, Heart, Compass } from 'lucide-react';
 import { videoApi } from '@/lib/services';
 import { Video, Category } from '@/lib/types';
 import { VideoCard } from '@/components/VideoCard';
-=======
-import { useRouter } from 'next/navigation';
-import { Play, Plus, TrendingUp, Radio, Flame, Music, Gamepad2 } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { API_BASE } from '@/lib/api';
->>>>>>> origin/main
 import { motion } from 'framer-motion';
 import { formatNumber, getErrorMessage } from '@/lib/utils';
 import { useToast } from '@/components/providers/ToastProvider';
@@ -51,7 +44,6 @@ function VideoFeed() {
   const categorySlug = searchParams.get('category') || '';
   const sort = (searchParams.get('sort') as typeof SORTS[number]['value']) || 'recent';
 
-<<<<<<< HEAD
   const [videos, setVideos] = useState<Video[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,174 +51,6 @@ function VideoFeed() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [trendingVideos, setTrendingVideos] = useState<Video[]>([]);
-=======
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.replace('/login');
-      return;
-    }
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true);
-    if (error) setError(null);
-
-    const url = search
-      ? `${API_BASE}/api/videos?search=${encodeURIComponent(search)}`
-      : `${API_BASE}/api/videos`;
-
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          if (res.status === 401) {
-            router.replace('/login');
-            return null;
-          }
-          throw new Error('Failed to load videos');
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (data !== null) setVideos(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError(err instanceof Error ? err.message : 'Failed to load videos');
-        setLoading(false);
-      });
-  }, [search, router]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
-
-  if (loading) return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-      {[...Array(8)].map((_, i) => (
-        <div key={i} className="glass-panel-premium aspect-video rounded-2xl animate-pulse bg-white/5" />
-      ))}
-    </div>
-  );
-
-  if (error) {
-    return (
-      <div className="text-center py-20 bg-red-500/10 rounded-2xl border border-red-500/20 text-slate-200">
-        <p className="text-xl font-medium text-red-400">{error}</p>
-        <Link href="/dashboard" className="mt-6 inline-block glass-button px-8 py-3 rounded-xl text-sm font-semibold">Try again</Link>
-      </div>
-    );
-  }
-
-  if (videos.length === 0) {
-    return (
-      <div className="text-center py-32 glass-panel-premium rounded-3xl border-dashed border-2 border-white/10 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-blue-500/5 blur-3xl rounded-full pointer-events-none" />
-        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 ring-1 ring-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)]">
-          <Play size={32} className="text-white/40 ml-1" />
-        </div>
-        <h3 className="text-2xl font-bold text-white mb-2 relative z-10">It&apos;s quiet here...</h3>
-        <p className="text-slate-400 max-w-md mx-auto mb-8 relative z-10">Upload your first video to start your streaming journey and share your content with the world.</p>
-        <Link href="/upload" className="glass-button-primary px-8 py-3 rounded-xl font-semibold relative z-10">Upload Video</Link>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      {/* Categories */}
-      <div className="flex gap-3 overflow-x-auto pb-6 scrollbar-hide mb-4">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.name}
-            onClick={() => setActiveCategory(cat.name)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border ${activeCategory === cat.name
-                ? 'bg-blue-600/20 border-blue-500/50 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
-                : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
-              }`}
-          >
-            <cat.icon size={16} />
-            {cat.name}
-          </button>
-        ))}
-      </div>
-
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
-      >
-        {videos.map((video) => (
-          <motion.div variants={item} key={video.id}>
-            <Link
-              href={`/watch/${video.id}`}
-              className="group block glass-panel-premium rounded-2xl overflow-hidden hover:translate-y-[-5px] transition-all duration-300 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] border-0"
-            >
-              <div className="aspect-video bg-slate-800 relative overflow-hidden">
-                {video.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={video.thumbnailUrl}
-                    alt={video.title}
-                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-600 bg-slate-900 group-hover:bg-slate-800 transition-colors">
-                    <Play size={40} className="opacity-50" />
-                  </div>
-                )}
-
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center border border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.3)] group-hover:scale-110 transition-transform duration-300">
-                    <Play size={24} className="text-white fill-white ml-1" />
-                  </div>
-                </div>
-
-                {/* View Count Badge */}
-                <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-xs font-medium text-white border border-white/10 shadow-lg">
-                  {video.views} views
-                </div>
-
-                {/* Category decoration */}
-                <div className="absolute top-3 left-3 px-2.5 py-1 bg-blue-600/80 backdrop-blur-md rounded-lg text-[10px] font-bold uppercase tracking-wider text-white border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity transform -translate-y-2 group-hover:translate-y-0 duration-300">
-                  Stream
-                </div>
-              </div>
-
-              <div className="p-5">
-                <h3 className="font-bold text-lg leading-tight truncate mb-2 text-white group-hover:text-blue-400 transition-colors">{video.title}</h3>
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-violet-500 ring-2 ring-white/10"></div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-slate-200">Streamer Name</span>
-                    <span className="text-xs text-slate-500">2 hours ago</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
-    </>
-  );
-}
-
-export default function Dashboard() {
-  const router = useRouter();
->>>>>>> origin/main
   const [authChecked, setAuthChecked] = useState(false);
   const [stats, setStats] = useState({ totalVideos: 0, totalViews: 0 });
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -236,7 +60,6 @@ export default function Dashboard() {
       router.replace(`/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
-<<<<<<< HEAD
     setAuthChecked(true);
   }, [isAuthenticated, router]);
 
@@ -294,12 +117,6 @@ export default function Dashboard() {
     if (sentinelRef.current) observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [hasMore, loadingMore, loading, page, search, categorySlug, sort]);
-=======
-    setTimeout(() => {
-      setAuthChecked(true);
-    }, 0);
-  }, [router]);
->>>>>>> origin/main
 
   if (!authChecked) {
     return (
