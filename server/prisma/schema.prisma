@@ -1,0 +1,275 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum VideoStatus {
+  PROCESSING
+  PUBLISHED
+  UNLISTED
+  PRIVATE
+  BLOCKED
+}
+
+enum NotificationType {
+  NEW_VIDEO
+  NEW_COMMENT
+  NEW_SUBSCRIBER
+  NEW_LIKE
+  SYSTEM
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  password        String
+  username        String         @unique
+  displayName     String?
+  bio             String?
+  avatarUrl       String?
+  bannerUrl       String?
+  role            UserRole       @default(USER)
+  isVerified      Boolean        @default(false)
+  subscriberCount Int            @default(0)
+  videoCount      Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  videos          Video[]        @relation("VideoOwner")
+  comments        Comment[]
+  likes           Like[]
+  views           View[]
+  playlists       Playlist[]
+  subscribers     Subscription[] @relation("ChannelSubscribers")
+  subscribing     Subscription[] @relation("Subscriber")
+  notifications   Notification[] @relation("NotificationReceiver")
+  triggerNotifications Notification[] @relation("NotificationActor")
+  sessions        Session[]
+
+  @@index([username])
+  @@index([email])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsed  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  iconUrl     String?
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  videos      Video[]
+
+  @@index([slug])
+}
+
+model Video {
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  thumbnailUrl  String?
+  videoUrl      String?
+  hlsUrl        String?
+  previewUrl    String?
+  duration      Int?           // seconds
+  views         Int            @default(0)
+  likes         Int            @default(0)
+  status        VideoStatus    @default(PUBLISHED)
+  categoryId    String?
+  userId        String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  publishedAt   DateTime?
+  user          User           @relation("VideoOwner", fields: [userId], references: [id], onDelete: Cascade)
+  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags          VideoTag[]
+  comments      Comment[]
+  videoLikes    Like[]
+  videoViews    View[]
+  playlistItems PlaylistItem[]
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([createdAt])
+  @@index([views])
+}
+
+model Tag {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  usageCount Int      @default(0)
+  createdAt DateTime  @default(now())
+  videos    VideoTag[]
+
+  @@index([slug])
+}
+
+model VideoTag {
+  videoId   String
+  tagId     String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([videoId, tagId])
+  @@index([tagId])
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  content   String
+  userId    String
+  videoId   String
+  parentId  String?
+  likes     Int       @default(0)
+  isEdited  Boolean   @default(false)
+  isPinned  Boolean   @default(false)
+  isHidden  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video     @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  @@index([videoId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  videoId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([videoId])
+}
+
+model View {
+  id          String   @id @default(uuid())
+  userId      String?
+  videoId     String
+  watchTime   Int      @default(0) // seconds watched
+  percentage  Float    @default(0)  // 0-100
+  ipAddress   String?
+  userAgent   String?
+  referrer    String?
+  country     String?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([videoId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Subscription {
+  id           String   @id @default(uuid())
+  subscriberId String
+  channelId    String
+  notifications Boolean @default(true)
+  createdAt    DateTime @default(now())
+
+  subscriber   User     @relation("Subscriber", fields: [subscriberId], references: [id], onDelete: Cascade)
+  channel      User     @relation("ChannelSubscribers", fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriberId, channelId])
+  @@index([channelId])
+  @@index([subscriberId])
+}
+
+model Playlist {
+  id          String        @id @default(uuid())
+  title       String
+  description String?
+  thumbnailUrl String?
+  isPublic    Boolean       @default(true)
+  userId      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       PlaylistItem[]
+
+  @@index([userId])
+}
+
+model PlaylistItem {
+  id         String   @id @default(uuid())
+  playlistId String
+  videoId    String
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  video      Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, videoId])
+  @@index([playlistId])
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  actorId     String?
+  type        NotificationType
+  title       String
+  message     String
+  link        String?
+  imageUrl    String?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation("NotificationReceiver", fields: [userId], references: [id], onDelete: Cascade)
+  actor       User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isRead])
+}

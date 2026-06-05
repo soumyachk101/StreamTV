@@ -1,0 +1,17 @@
+{
+  "name": "Stream.Tv",
+  "short_name": "Stream.Tv",
+  "description": "Mindful video streaming platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFCF8",
+  "theme_color": "#5D7052",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
