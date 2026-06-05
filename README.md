@@ -132,7 +132,7 @@ sequenceDiagram
     Server->>Client: Return 201 Created (Video Object)
     Note over Client: Client Watch Page redirects to `/watch/:id`<br/>Displays: "Video is currently processing..."
     Server->>Worker: Trigger processVideoInBackground() asynchronously
-    Note over Server: Server does not block; returns immediate response to creator
+    Note over Server: Server does not block and returns immediate response to creator
     
     activate Worker
     Worker->>Worker: Run ffprobe to extract true video duration
@@ -290,6 +290,58 @@ if (Hls.isSupported()) {
 | **API Speed** | Slow payload transfers; triggers server timeout on large images. | Instant transfers; optimized byte delivery. |
 | **Client Caching** | Images cannot be cached effectively by the browser. | Fully cached via static cache-control. |
 | **Scalability** | Relational databases scale poorly under heavy binary storage. | Scales infinitely (easily moves to S3/Cloudfront). |
+
+---
+
+## 🌐 Deployment Guide
+
+This section outlines how to deploy Stream.Tv to cloud environments:
+
+### 1. Database (PostgreSQL)
+* Use a cloud-managed PostgreSQL database like **Neon Cloud PostgreSQL**, **Supabase**, or **AWS RDS**.
+* Ensure you add `?sslmode=require` to the end of the database connection string in your production environment.
+* Run database setup commands during your CI/CD build step:
+  ```bash
+  npx prisma db push
+  ```
+
+### 2. Backend API Server (Express)
+The server requires **FFmpeg** and **FFprobe** system binaries to transcode videos.
+* **Option A: Railway / Render (Using Docker)**:
+  Create a `Dockerfile` in the `server/` directory:
+  ```dockerfile
+  FROM node:18-slim
+  RUN apt-get update && apt-get install -y ffmpeg
+  WORKDIR /app
+  COPY package*.json ./
+  RUN npm ci
+  COPY . .
+  RUN npx prisma generate
+  RUN npm run build
+  EXPOSE 5050
+  CMD ["npm", "start"]
+  ```
+  Deploying with Docker is highly recommended because it packages system dependencies like FFmpeg directly into the build.
+* **Option B: Virtual Private Server (VPS / DigitalOcean / AWS EC2)**:
+  1. SSH into your VPS.
+  2. Install Node.js, Git, PM2 (`npm install -g pm2`), and FFmpeg (`sudo apt install ffmpeg`).
+  3. Clone the repository, navigate to `server/`, create `.env`, and install dependencies (`npm install`).
+  4. Run `npx prisma db push` and `npm run build`.
+  5. Start the backend process using PM2:
+     ```bash
+     pm2 start dist/index.js --name "stream-tv-server"
+     ```
+* **Persistent Disk Mount**:
+  Because standard cloud container deployments are ephemeral, uploaded videos and thumbnails will be lost when the container restarts.
+  * Mount a persistent disk volume (e.g. **Render Disk** or **Railway Volume**) to the `/app/uploads` path on the server container.
+
+### 3. Frontend Application (Next.js)
+* Deploy the `client/` folder to **Vercel** or **Netlify**.
+* Configure the build settings:
+  * **Build Command**: `npm run build`
+  * **Output Directory**: `.next`
+* Configure Environment Variables:
+  * Set `NEXT_PUBLIC_API_URL` to your backend production URL (e.g. `https://your-api.railway.app`).
 
 ---
 
