@@ -172,7 +172,7 @@ Ensure you have the following installed:
    Create a `.env` file inside the `server/` directory:
    ```env
    PORT=5050
-   DATABASE_URL="postgresql://neondb_owner:npg_aT8fvQYsOc3P@ep-nameless-dream-aidkt769-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require"
+   DATABASE_URL="postgresql://your_username:your_password@localhost:5432/neondb?sslmode=require"
    JWT_SECRET="YOUR_RANDOM_LONG_SECRET_STRING_32_CHARACTERS"
    JWT_EXPIRES_IN="7d"
    BCRYPT_ROUNDS=10
@@ -180,7 +180,7 @@ Ensure you have the following installed:
    CORS_ORIGIN="http://localhost:3000"
    ```
 4. **Synchronize DB Schema**:
-   Generate client and push the schema to Neon Cloud PostgreSQL:
+   Generate client and push the schema to your PostgreSQL database:
    ```bash
    npm run db:push
    ```
